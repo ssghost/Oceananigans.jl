@@ -2,8 +2,7 @@
 import Oceananigans.TimeSteppers: calculate_tendencies!
 
 using Oceananigans.Utils: work_layout
-#using Oceananigans: fields
-using Oceananigans.Models: fields
+using Oceananigans: fields
 
 using KernelAbstractions: @index, @kernel, Event, MultiEvent
 
@@ -17,7 +16,6 @@ using Oceananigans.BoundaryConditions
 Calculate the interior and boundary contributions to tendency terms without the
 contribution from non-hydrostatic pressure.
 """
-#calculate_tendencies!(model::ShallowWaterModel)  = nothing
 function calculate_tendencies!(model::ShallowWaterModel)
 
     # Note:
@@ -37,8 +35,8 @@ function calculate_tendencies!(model::ShallowWaterModel)
                                                model.coriolis,
                                                model.solution,
                                                model.tracers,
-#                                               model.diffusivities,
-#                                               model.forcing,
+                                               model.diffusivities,
+                                               model.forcing,
                                                model.clock)
 
     # Calculate contributions to momentum and tracer tendencies from user-prescribed fluxes across the
@@ -61,8 +59,8 @@ function calculate_interior_tendency_contributions!(tendencies,
                                                     coriolis,
                                                     solution,
                                                     tracers,
-#                                                    diffusivities,
-#                                                    forcings,
+                                                    diffusivities,
+                                                    forcings,
                                                     clock)
 
     workgroup, worksize = work_layout(grid, :xyz)
@@ -75,16 +73,13 @@ function calculate_interior_tendency_contributions!(tendencies,
     barrier = Event(device(arch))
 
     Guh_event = calculate_Guh_kernel!(tendencies.uh, grid, advection, coriolis, solution, tracers,
-                                      clock, dependencies=barrier)
-#                                      diffusivities, forcings, clock, dependencies=barrier)
+                                      diffusivities, forcings, clock, dependencies=barrier)
 
     Gvh_event = calculate_Gvh_kernel!(tendencies.vh, grid, advection, coriolis, solution, tracers,
-                                      clock, dependencies=barrier)
-#                                      diffusivities, forcings, clock, dependencies=barrier)
+                                      diffusivities, forcings, clock, dependencies=barrier)
 
     Gh_event  = calculate_Gh_kernel!(tendencies.h, grid, advection, coriolis, solution, tracers,
-                                     clock, dependencies=barrier)
-#                                     diffusivities, forcings, clock, dependencies=barrier)
+                                     diffusivities, forcings, clock, dependencies=barrier)
 
     events = [Guh_event, Gvh_event, Gh_event]
 
@@ -93,8 +88,7 @@ function calculate_interior_tendency_contributions!(tendencies,
         @inbounds forcing = forcings[tracer_index+3]
 
         Gc_event = calculate_Gc_kernel!(c_tendency, grid, Val(tracer_index), advection, solution,
-                                        tracers, clock, dependencies=barrier)
-#                                        tracers, diffusivities, forcing, clock, dependencies=barrier)
+                                        tracers, diffusivities, forcing, clock, dependencies=barrier)
 
         push!(events, Gc_event)
     end
@@ -115,15 +109,14 @@ end
                                 coriolis,
                                 solution,
                                 tracers,
-#                                diffusivities,
-#                                forcings,
+                                diffusivities,
+                                forcings,
                                 clock)
 
     i, j, k = @index(Global, NTuple)
 
     @inbounds Guh[i, j, k] = uh_solution_tendency(i, j, k, grid, advection, coriolis, solution, tracers,
-                                                  clock)
-#                                                 diffusivities, forcings, clock)
+                                                 diffusivities, forcings, clock)
 end
 
 """ Calculate the right-hand-side of the vh-transport equation. """
@@ -133,8 +126,8 @@ end
                                 coriolis,
                                 solution,
                                 tracers,
-#                                diffusivities,
-#                                forcings,
+                                diffusivities,
+                                forcings,
                                 clock)
 
     i, j, k = @index(Global, NTuple)
@@ -151,15 +144,14 @@ end
                                 coriolis,
                                 solution,
                                 tracers,
-#                                diffusivities,
-#                                forcings,
+                                diffusivities,
+                                forcings,
                                 clock)
 
     i, j, k = @index(Global, NTuple)
 
     @inbounds Gh[i, j, k] = h_solution_tendency(i, j, k, grid, advection, coriolis, solution, tracers,
-                                                  clock)
-#                                                  diffusivities, forcings, clock)
+                                                  diffusivities, forcings, clock)
 end
 
 #####
@@ -173,15 +165,14 @@ end
                                advection,
                                solution,
                                tracers,
-#                               diffusivities,
-#                               forcing,
+                               diffusivities,
+                               forcing,
                                clock)
 
     i, j, k = @index(Global, NTuple)
 
     @inbounds Gc[i, j, k] = tracer_tendency(i, j, k, grid, tracer_index, advection, solution, tracers,
-                                            clock)
-#                                            diffusivities, forcing, clock)
+                                            diffusivities, forcing, clock)
 end
 
 #####
