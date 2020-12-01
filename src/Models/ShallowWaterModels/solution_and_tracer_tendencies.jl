@@ -12,8 +12,8 @@ Compute the tendency for the x-directional transport, uh
                                       tracers,
                                       clock)
 
-    return ( - 0.0 )
-#    return ( - ∂xᶠᵃᵃ(i, j, k, grid, solution.h) )
+#    return ( - 0.0 )
+    return ( - ∂xᶠᵃᵃ(i, j, k, grid, solution.h) )
 end
 
 """
@@ -26,8 +26,8 @@ Compute the tendency for the y-directional transport, vh.
                                       tracers,
                                       clock)
 
-    return ( -0.0 )
-#    return ( - ∂yᵃᶠᵃ(i, j, k, grid, solution.h) )
+#    return ( -0.0 )
+    return ( - ∂yᵃᶠᵃ(i, j, k, grid, solution.h) )
 
 end
 
@@ -35,19 +35,21 @@ end
 Compute the tendency for the height, h.
 """
 @inline function h_solution_tendency(i, j, k, grid,
-                            advection,
-                            solution,
-                            tracers,
-                            clock) where tracer_index
+                                     advection,
+                                     coriiolis,
+                                     solution,
+                                     tracers,
+                                     clock) where tracer_index
 
-    return ( - 0.0  )
-#    return ( - ∂xᶠᵃᵃ(i, j, k, grid, solution.h) )
+#    return ( - 0.0  )
+    return ( - ∂xᵃᶠᵃ(i, j, k, grid, solution.h) )
 
 end
 
 @inline function tracer_tendency(i, j, k, grid,
                                  val_tracer_index::Val{tracer_index},
                                  advection,
+                                 coriolis,
                                  solution,
                                  tracers,
                                  clock) where tracer_index
